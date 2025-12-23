@@ -1,0 +1,25 @@
+{
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/src",
+        "${workspaceFolder}/src/core", 
+        "${workspaceFolder}/src/gui",
+        "/opt/homebrew/include",
+        "/usr/local/include"
+    ],
+    "C_Cpp.default.macFrameworkPath": [
+        "/System/Library/Frameworks",
+        "/Library/Frameworks"
+    ],
+    "C_Cpp.default.compilerPath": "/usr/bin/clang",
+    "C_Cpp.default.cStandard": "c17",
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.default.intelliSenseMode": "macos-clang-arm64",
+    "files.associations": {
+        "durak.h": "c",
+        "graf.h": "c",
+        "queue.h": "c",
+        "bfs.h": "c",
+        "dijkstra.h": "c",
+        "minheap.h": "c"
+    }
+}

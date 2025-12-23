@@ -1,0 +1,13 @@
+baslangic_id,hedef_id,mesafe,sure,hat_adi
+1,2,5,15,Metro-M2
+2,3,3,10,Metro-M2
+3,8,2,5,Metro-M2
+1,6,2,8,Metro-M2
+6,7,1,3,Metro-M2
+4,5,4,20,Vapur
+4,10,3,15,Vapur
+5,10,5,25,Vapur
+2,10,8,30,Otobus-30T
+3,7,1,4,Metro-M2
+1,9,6,20,Metro-M2
+9,10,1,5,Metro-M2
