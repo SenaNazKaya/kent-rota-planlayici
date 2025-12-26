@@ -1,13 +1,29 @@
 #include "gui.h"
 #include <math.h>
+#include <string.h>
 
-void gui_init(GuiState* state) {
+void gui_init(GuiState* state, Durak* duraklar, Hat* hatlar, Graf* graf) {
+    state->current_page = PAGE_MAIN_MENU;
+    state->input_mode = INPUT_NONE;
+    state->secili_menu_item = 0;
     state->secili_durak = -1;
     state->baslangic_id = -1;
     state->hedef_id = -1;
     state->rota_hesaplaniyor = false;
     state->rota_gosteriliyor = false;
+    
+    state->duraklar_list = duraklar;
+    state->hatlar_list = hatlar;
+    state->graf = graf;
+    state->bfs_yol = NULL;
+    state->dijkstra_yol = NULL;
+    
+    memset(state->input_buffer, 0, sizeof(state->input_buffer));
+    state->input_cursor = 0;
+    state->scroll_offset = 0;
+    state->max_scroll = 0;
 }
+
 
 int gui_get_durak_from_mouse(Vector2 mouse) {
     int durak_positions[5][2] = {

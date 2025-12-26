@@ -43,6 +43,7 @@ Durak* duraklariOku(const char* dosya_adi) {
     return bas;
 }
 
+
 Hat* hatlariOku(const char* dosya_adi) {
     FILE* file = fopen(dosya_adi, "r");
     if (!file) {

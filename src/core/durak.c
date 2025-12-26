@@ -6,14 +6,7 @@
 // Graf fonksiyonları zaten graf.c'de
 // Sadece gerekli fonksiyonları ekleyelim
 
-int durakIDileIndex(Graf* graf, int durak_id) {
-    for (int i = 0; i < graf->dugum_sayisi; i++) {
-        if (graf->duraklar[i] && graf->duraklar[i]->id == durak_id) {
-            return i;
-        }
-    }
-    return -1;
-}
+
 
 // Trie için basit fonksiyon (opsiyonel)
 TrieDugum* yeniTrieDugum() {

@@ -1,8 +1,8 @@
-#include "durak.h"
-#include "graf.h"
-#include "bfs.h"
-#include "dijkstra.h"
-#include "ui.h"
+#include "core/durak.h"
+#include "core/graf.h"
+#include "core/bfs.h"
+#include "core/dijkstra.h"
+#include "core/ui.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <locale.h>

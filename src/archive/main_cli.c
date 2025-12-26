@@ -57,8 +57,8 @@ int main() {
     printf("3. Hafta: Dijkstra Algoritmasi Eklendi\n\n");
     
     // 1. Dosyalardan verileri oku
-    Durak* duraklar = duraklariOku("../data/durak.csv");
-    Hat* hatlar = hatlariOku("../data/hat.csv");
+    Durak* duraklar = duraklariOku("data/durak.csv");
+    Hat* hatlar = hatlariOku("data/hat.csv");
     
     if (!duraklar || !hatlar) {
         printf("HATA: Veriler yuklenemedi!\n");

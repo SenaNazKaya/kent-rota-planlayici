@@ -12,8 +12,9 @@ extern void grafTemizle(Graf* graf);
 int main() {
     printf("Raylib Rota Planlayici baslatiliyor...\n");
     
-    Durak* duraklar = duraklariOku("../data/durak.csv");
-    Hat* hatlar = hatlariOku("../data/hat.csv");
+    // Verileri yükle
+    Durak* duraklar = duraklariOku("data/durak.csv");
+    Hat* hatlar = hatlariOku("data/hat.csv");
     
     if (!duraklar || !hatlar) {
         printf("HATA: Veriler yuklenemedi!\n");
@@ -28,12 +29,15 @@ int main() {
     
     printf("%d durak yuklendi.\n", graf->dugum_sayisi);
     
+    // Raylib penceresini aç
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Kent Ici Rota Planlayici");
     SetTargetFPS(60);
     
+    // GUI state'i oluştur (DOĞRU: 4 parametre ile)
     GuiState gui_state;
-    gui_init(&gui_state);
+    gui_init(&gui_state, duraklar, hatlar, graf);  // BURASI DÜZELDİ!
     
+    // Ana döngü
     while (!WindowShouldClose()) {
         gui_update(&gui_state);
         
@@ -43,9 +47,11 @@ int main() {
         EndDrawing();
     }
     
+    // Temizlik
     gui_cleanup(&gui_state);
     CloseWindow();
     
+    // Graf'ı temizle
     if (graf) grafTemizle(graf);
     
     printf("Program sonlandi.\n");
