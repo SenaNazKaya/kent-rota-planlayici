@@ -1,0 +1,22 @@
+# Derlenmiş uygulamalar
+rota_*
+test_*
+
+# C derleme dosyaları
+*.out
+*.exe
+*.o
+*.a
+
+# IDE/Editor dosyaları
+.vscode/
+*.swp
+*.swo
+
+# Mac özel dosyaları
+.DS_Store
+*.dSYM/
+
+# Debug dosyaları
+debug/
+build/
