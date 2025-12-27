@@ -1,127 +1,229 @@
 #include "gui.h"
-#include <math.h>
 #include <string.h>
+#include <math.h>
 
+/* ================= INIT ================= */
 void gui_init(GuiState* state, Durak* duraklar, Hat* hatlar, Graf* graf) {
-    state->current_page = PAGE_MAIN_MENU;
-    state->input_mode = INPUT_NONE;
-    state->secili_menu_item = 0;
-    state->secili_durak = -1;
+    memset(state, 0, sizeof(GuiState));
+
     state->baslangic_id = -1;
     state->hedef_id = -1;
-    state->rota_hesaplaniyor = false;
-    state->rota_gosteriliyor = false;
-    
+
     state->duraklar_list = duraklar;
     state->hatlar_list = hatlar;
     state->graf = graf;
+
     state->bfs_yol = NULL;
     state->dijkstra_yol = NULL;
-    
-    memset(state->input_buffer, 0, sizeof(state->input_buffer));
-    state->input_cursor = 0;
-    state->scroll_offset = 0;
-    state->max_scroll = 0;
+    state->rota_gosteriliyor = false;
 }
 
+/* ================= HAT RENK ================= */
+Color gui_hat_renk(const char* hat) {
+    if (strstr(hat, "Metro"))  return BLUE;
+    if (strstr(hat, "Otobus")) return ORANGE;
+    if (strstr(hat, "Vapur"))  return PURPLE;
+    return DARKGRAY;
+}
 
-int gui_get_durak_from_mouse(Vector2 mouse) {
-    int durak_positions[5][2] = {
-        {400, 200},
-        {500, 300},
-        {600, 200},
-        {700, 300},
-        {800, 200}
-    };
-    
-    for (int i = 0; i < 5; i++) {
-        float dx = mouse.x - durak_positions[i][0];
-        float dy = mouse.y - durak_positions[i][1];
-        float distance = sqrt(dx*dx + dy*dy);
-        if (distance < 25) return i;
+/* ================= DURAK POZ ================= */
+Vector2 gui_get_durak_position_by_id(GuiState* state, int id) {
+    Durak* d = state->duraklar_list;
+    int i = 0;
+    while (d) {
+        if (d->id == id) {
+            return (Vector2){
+                PANEL_WIDTH + 100 + (i % 5) * 120,
+                120 + (i / 5) * 120
+            };
+        }
+        d = d->sonraki;
+        i++;
     }
-    return -1;
+    return (Vector2){-1, -1};
 }
 
+/* ================= UPDATE ================= */
 void gui_update(GuiState* state) {
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        Vector2 mouse = GetMousePosition();
-        
-        if (mouse.x > PANEL_WIDTH) {
-            int clicked_durak = gui_get_durak_from_mouse(mouse);
-            if (clicked_durak != -1) {
-                state->secili_durak = clicked_durak;
-                if (state->baslangic_id == -1) {
-                    state->baslangic_id = clicked_durak;
-                } else if (state->hedef_id == -1) {
-                    state->hedef_id = clicked_durak;
-                }
-            }
-        }
-        
-        Rectangle rota_btn = {50, 200, 200, 50};
-        Rectangle temizle_btn = {50, 270, 200, 50};
-        
-        if (CheckCollisionPointRec(mouse, rota_btn)) {
-            if (state->baslangic_id != -1 && state->hedef_id != -1) {
-                state->rota_hesaplaniyor = true;
-            }
-        }
-        
-        if (CheckCollisionPointRec(mouse, temizle_btn)) {
+    Vector2 mouse = GetMousePosition();
+
+    Rectangle bfs_btn = {50, 300, 200, 40};
+    Rectangle dm_btn  = {50, 350, 200, 40};
+    Rectangle ds_btn  = {50, 400, 200, 40};
+    Rectangle temizle = {50, 450, 200, 40};
+
+    /* 🔴 BUTONLAR ÖNCE */
+    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+
+        if (CheckCollisionPointRec(mouse, temizle)) {
             state->baslangic_id = -1;
             state->hedef_id = -1;
-            state->secili_durak = -1;
+            state->rota_gosteriliyor = false;
+
+            if (state->bfs_yol) bfsYolTemizle(state->bfs_yol);
+            if (state->dijkstra_yol) dijkstraYolTemizle(state->dijkstra_yol);
+
+            state->bfs_yol = NULL;
+            state->dijkstra_yol = NULL;
+            return;
+        }
+
+        if (state->baslangic_id != -1 && state->hedef_id != -1) {
+
+            if (CheckCollisionPointRec(mouse, bfs_btn)) {
+                if (state->bfs_yol) bfsYolTemizle(state->bfs_yol);
+                state->bfs_yol = bfsEnKisaYol(
+                    state->graf,
+                    state->baslangic_id,
+                    state->hedef_id
+                );
+                state->rota_turu = 0; // BFS
+                state->rota_gosteriliyor = true;
+                return;
+            }
+
+            if (CheckCollisionPointRec(mouse, dm_btn)) {
+                if (state->dijkstra_yol) dijkstraYolTemizle(state->dijkstra_yol);
+                state->dijkstra_yol = dijkstraEnKisaYol(
+                    state->graf,
+                    state->baslangic_id,
+                    state->hedef_id,
+                    0
+                );
+                state->rota_turu = 1; // Dijkstra
+                state->son_dijkstra_kriter = 0; // mesafe
+                state->rota_gosteriliyor = true;
+                return;
+            }
+
+            if (CheckCollisionPointRec(mouse, ds_btn)) {
+                if (state->dijkstra_yol) dijkstraYolTemizle(state->dijkstra_yol);
+                state->dijkstra_yol = dijkstraEnKisaYol(
+                    state->graf,
+                    state->baslangic_id,
+                    state->hedef_id,
+                    1
+                );
+                state->rota_turu = 1; // Dijkstra
+                state->son_dijkstra_kriter = 1; // sure
+                state->rota_gosteriliyor = true;
+                return;
+            }
+        }
+    }
+
+    /* 🟢 DURAK SEÇİMİ */
+    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && mouse.x > PANEL_WIDTH) {
+        Durak* d = state->duraklar_list;
+        while (d) {
+            Vector2 p = gui_get_durak_position_by_id(state, d->id);
+            if (CheckCollisionPointCircle(mouse, p, 25)) {
+                if (state->baslangic_id == -1) state->baslangic_id = d->id;
+                else if (state->hedef_id == -1) state->hedef_id = d->id;
+                break;
+            }
+            d = d->sonraki;
         }
     }
 }
 
+/* ================= DRAW ================= */
 void gui_draw(GuiState* state) {
+
+    /* SOL PANEL */
     DrawRectangle(0, 0, PANEL_WIDTH, SCREEN_HEIGHT, COLOR_PANEL);
-    DrawText("ROTA PLANLAYICI", 30, 20, 24, WHITE);
-    
-    if (state->secili_durak != -1) {
-        DrawText(TextFormat("Secili: ID %d", state->secili_durak), 30, 100, 20, YELLOW);
+    DrawText("ROTA PLANLAYICI", 40, 20, 24, WHITE);
+
+    DrawText("1) Baslangic sec", 40, 80, 16, LIGHTGRAY);
+    DrawText("2) Hedef sec",    40,105, 16, LIGHTGRAY);
+    DrawText("3) Algoritma sec",40,130, 16, LIGHTGRAY);
+
+    DrawRectangleRec((Rectangle){50,300,200,40}, COLOR_BUTTON);
+    DrawText("BFS (Az Aktarma)", 55, 312, 14, WHITE);
+
+    DrawRectangleRec((Rectangle){50,350,200,40}, COLOR_BUTTON);
+    DrawText("Dijkstra Mesafe",  55, 362, 14, WHITE);
+
+    DrawRectangleRec((Rectangle){50,400,200,40}, COLOR_BUTTON);
+    DrawText("Dijkstra Sure",    55, 412, 14, WHITE);
+
+    DrawRectangleRec((Rectangle){50,450,200,40}, GRAY);
+    DrawText("Temizle", 115, 462, 14, WHITE);
+
+    /* SAĞ PANEL */
+    DrawRectangle(PANEL_WIDTH, 0,
+        SCREEN_WIDTH - PANEL_WIDTH, SCREEN_HEIGHT, COLOR_BG);
+
+    /* DURAKLAR */
+    Durak* d = state->duraklar_list;
+    while (d) {
+        Vector2 p = gui_get_durak_position_by_id(state, d->id);
+        Color c = BLUE;
+        if (d->id == state->baslangic_id) c = GREEN;
+        if (d->id == state->hedef_id) c = RED;
+
+        DrawCircleV(p, 25, c);
+        DrawCircleLines(p.x,p.y,25,BLACK);
+        DrawText(d->ad, p.x-30, p.y-38, 10, BLACK);
+        DrawText(TextFormat("ID:%d",d->id), p.x-18, p.y+28, 10, DARKGRAY);
+        d = d->sonraki;
     }
-    if (state->baslangic_id != -1) {
-        DrawText(TextFormat("Baslangic: ID %d", state->baslangic_id), 30, 130, 18, GREEN);
-    }
-    if (state->hedef_id != -1) {
-        DrawText(TextFormat("Hedef: ID %d", state->hedef_id), 30, 160, 18, RED);
-    }
-    
-    Rectangle rota_btn = {50, 200, 200, 50};
-    Rectangle temizle_btn = {50, 270, 200, 50};
-    DrawRectangleRec(rota_btn, COLOR_BUTTON);
-    DrawText("ROTA BUL", 100, 215, 24, WHITE);
-    DrawRectangleRec(temizle_btn, GRAY);
-    DrawText("TEMIZLE", 100, 285, 24, WHITE);
-    
-    DrawRectangle(PANEL_WIDTH, 0, SCREEN_WIDTH - PANEL_WIDTH, SCREEN_HEIGHT, COLOR_BG);
-    
-    int durak_positions[5][2] = {{400,200},{500,300},{600,200},{700,300},{800,200}};
-    
-    for (int i = 0; i < 5; i++) {
-        Color renk = BLUE;
-        if (i == state->baslangic_id) renk = GREEN;
-        if (i == state->hedef_id) renk = RED;
-        
-        DrawCircle(durak_positions[i][0], durak_positions[i][1], 25, renk);
-        DrawCircleLines(durak_positions[i][0], durak_positions[i][1], 25, BLACK);
-        DrawText(TextFormat("%d", i), durak_positions[i][0]-5, durak_positions[i][1]-7, 15, WHITE);
-    }
-    
-    for (int i = 0; i < 4; i++) {
-        DrawLine(durak_positions[i][0], durak_positions[i][1],
-                durak_positions[i+1][0], durak_positions[i+1][1], DARKGRAY);
-    }
-    
-    DrawText("ESC: Cikis | Sol tik: Durak sec", 30, SCREEN_HEIGHT-40, 15, LIGHTGRAY);
-    
-    if (state->rota_hesaplaniyor) {
-        DrawText("Rota hesaplaniyor...", SCREEN_WIDTH/2-100, 50, 20, DARKBLUE);
+
+    /* ================= ROTA + SONUÇ ================= */
+    if (state->rota_gosteriliyor) {
+
+        int *yol = NULL, len = 0;
+
+        if (state->rota_turu == 0 && state->bfs_yol) {
+            yol = state->bfs_yol->yol;
+            len = state->bfs_yol->uzunluk;
+        }
+        if (state->rota_turu == 1 && state->dijkstra_yol) {
+            yol = state->dijkstra_yol->yol;
+            len = state->dijkstra_yol->uzunluk;
+        }
+
+        for (int i = 0; i < len - 1; i++) {
+            int u = yol[i], v = yol[i+1];
+            int idx = durakIDileIndex(state->graf, u);
+            Hat* h = state->graf->kenarlar[idx];
+            while (h) {
+                if (h->hedef_id == v) {
+                    Vector2 a = gui_get_durak_position_by_id(state, u);
+                    Vector2 b = gui_get_durak_position_by_id(state, v);
+                    DrawLineEx(a, b, 5, gui_hat_renk(h->hat_adi));
+                    break;
+                }
+                h = h->sonraki;
+            }
+        }
+
+        int x = PANEL_WIDTH + 30;
+        int y = SCREEN_HEIGHT - 150;
+
+        if (state->rota_turu == 0 && state->bfs_yol) {
+            DrawText("BFS - EN AZ AKTARMA", x, y, 20, DARKGREEN);
+            DrawText(TextFormat("Mesafe : %d km", state->bfs_yol->mesafe), x, y+30, 18, BLACK);
+            DrawText(TextFormat("Sure    : %d dk", state->bfs_yol->sure),   x, y+55, 18, BLACK);
+            DrawText(TextFormat("Aktarma : %d", state->bfs_yol->aktarma),  x, y+80, 18, MAROON);
+        }
+
+        if (state->rota_turu == 1 && state->dijkstra_yol) {
+            DrawText(
+                state->son_dijkstra_kriter == 0 ?
+                "DIJKSTRA - EN KISA MESAFE" :
+                "DIJKSTRA - EN KISA SURE",
+                x, y, 20, DARKBLUE
+            );
+            DrawText(TextFormat("Mesafe : %d km", state->dijkstra_yol->mesafe), x, y+30, 18, BLACK);
+            DrawText(TextFormat("Sure    : %d dk", state->dijkstra_yol->sure),   x, y+55, 18, BLACK);
+            DrawText(TextFormat("Aktarma : %d", state->dijkstra_yol->aktarma),  x, y+80, 18, MAROON);
+        }
     }
 }
 
+/* ================= CLEANUP ================= */
 void gui_cleanup(GuiState* state) {
+    if (state->bfs_yol) bfsYolTemizle(state->bfs_yol);
+    if (state->dijkstra_yol) dijkstraYolTemizle(state->dijkstra_yol);
 }
