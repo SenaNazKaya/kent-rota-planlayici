@@ -1,28 +1,31 @@
 baslangic_id,hedef_id,mesafe,sure,hat_adi
+# ================= METRO (M2 GERÇEKÇİ) =================
+1,2,3,8,Metro-M2      # Taksim → Levent
+2,3,3,7,Metro-M2      # Levent → Maslak
+2,6,4,6,Metro-M2   # Levent → Beşiktaş (aktarma kabul edilebilir)
+6,2,4,6,Metro-M2
 
-# METRO (şehir içi)
-1,2,3,8,Metro-M2
-2,3,3,7,Metro-M2
-3,7,2,5,Metro-M2
-7,6,2,5,Metro-M2
 
-# METRO alternatif
-1,9,6,6,Metro-M1
-9,4,4,4,Metro-M1
+# ================= MARMARAY (ANA AKS) =================
+5,4,2,4,Marmaray      # Üsküdar → Kadıköy
+4,5,2,4,Marmaray
+5,9,4,6,Marmaray      # Üsküdar → Yenikapı
+9,5,4,6,Marmaray
+9,10,6,8,Marmaray     # Yenikapı → Bostancı
+10,9,6,8,Marmaray
 
-# VAPUR (GERÇEKÇİ)
-6,5,5,10,Vapur          # Beşiktaş → Üsküdar
+# ================= VAPUR =================
+6,5,5,10,Vapur        # Beşiktaş → Üsküdar
+5,6,5,10,Vapur
+# ================= OTOBÜS (YAVAŞ / GERÇEKÇİ) =================
+6,7,4,15,Otobus-14    # Beşiktaş → Şişli
+7,3,4,12,Otobus-66    # Şişli → Maslak
+4,8,6,15,Otobus-19K   # Kadıköy → Ataşehir (otobüs)
 
-# MARMARAY (ANA AKS)
-5,4,2,4,Marmaray        # Üsküdar → Kadıköy (Söğütlüçeşme)
-5,9,4,6,Marmaray        # Üsküdar → Yenikapı
-9,10,6,8,Marmaray      # Yenikapı → Bostancı
-
-# OTOBÜS (ALTERNATİF / YAVAŞ)
 2,10,12,25,Otobus-500T
 10,5,6,15,Otobus-500T
-6,5,4,20,Otobus-14
 
-# KISA BAĞLANTILAR
-3,8,5,12,Otobus-19
-8,10,4,8,Metro-M5
+
+# ================= AKTARMA BAĞLANTILARI =================
+4,5,2,5,Marmaray       # Kadıköy → Üsküdar (transfer)
+

@@ -35,11 +35,16 @@ GUI_SRC = src/main_raylib.c \
 	src/core/durak.c \
 	src/core/graf.c \
 	src/core/fileio.c \
+	src/core/bfs.c \
+	src/core/dijkstra.c \
+	src/core/minheap.c \
+	src/core/queue.c \
 	src/gui/gui.c
+
 
 .PHONY: all cli tui gui clean
 
-all: cli tui gui
+all: gui
 
 cli: $(CLI_SRC)
 	$(CC) $(CFLAGS) -o $(TARGET_CLI) $(CLI_SRC)
