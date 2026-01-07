@@ -4,6 +4,8 @@
 #include "dijkstra.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <locale.h>
+
 
 extern Durak* duraklariOku(const char* dosya_adi);
 extern Hat* hatlariOku(const char* dosya_adi);
@@ -53,6 +55,7 @@ void rotaBulGoster(Graf* graf, int algoritma) {
 }
 
 int main() {
+    setlocale(LC_ALL, "");
     printf("=== KENT İÇİ ROTA PLANLAYICI ===\n");
     printf("3. Hafta: Dijkstra Algoritmasi Eklendi\n\n");
     

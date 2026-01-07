@@ -6,7 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include <ncurses.h>
+
+// ncurses.h'yi KALDIRIYORUZ çünkü raylib ile çakışıyor
+// #include <ncurses.h>
 
 #define MAX_NAME 50
 #define MAX_HAT_ADI 20
@@ -65,5 +67,13 @@ Graf* grafOlustur(Durak* duraklar, Hat* hatlar);
 void grafYazdir(Graf* graf);
 void grafTemizle(Graf* graf);
 int durakIDileIndex(Graf* graf, int durak_id);
+
+// CSV okuma fonksiyonları - BUNLARI KALDIRIYORUZ çünkü fileio.c'de
+// Durak* duraklariOku(const char* dosya_adi);
+// Hat* hatlariOku(const char* dosya_adi);
+
+// Yeni: Yazdırma fonksiyonları (durak.c'de olacak)
+void duraklariYazdir(Durak* bas);
+void hatlariYazdir(Hat* bas);
 
 #endif

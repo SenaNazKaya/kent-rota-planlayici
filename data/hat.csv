@@ -1,23 +1,28 @@
 baslangic_id,hedef_id,mesafe,sure,hat_adi
 
-# METRO (kısa mesafe, çok durak)
+# METRO (şehir içi)
 1,2,3,8,Metro-M2
 2,3,3,7,Metro-M2
 3,7,2,5,Metro-M2
 7,6,2,5,Metro-M2
 
-# METRO alternatif (daha uzun mesafe ama hızlı)
+# METRO alternatif
 1,9,6,6,Metro-M1
 9,4,4,4,Metro-M1
 
-# VAPUR (uzun mesafe ama süre avantajı)
-6,4,8,6,Vapur
-4,5,3,5,Vapur
+# VAPUR (GERÇEKÇİ)
+6,5,5,10,Vapur          # Beşiktaş → Üsküdar
 
-# OTOBÜS (direkt ama yavaş)
+# MARMARAY (ANA AKS)
+5,4,2,4,Marmaray        # Üsküdar → Kadıköy (Söğütlüçeşme)
+5,9,4,6,Marmaray        # Üsküdar → Yenikapı
+9,10,6,8,Marmaray      # Yenikapı → Bostancı
+
+# OTOBÜS (ALTERNATİF / YAVAŞ)
 2,10,12,25,Otobus-500T
 10,5,6,15,Otobus-500T
+6,5,4,20,Otobus-14
 
-# ŞEHİR İÇİ KISA BAĞLANTILAR
+# KISA BAĞLANTILAR
 3,8,5,12,Otobus-19
 8,10,4,8,Metro-M5

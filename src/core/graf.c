@@ -3,114 +3,174 @@
 #include <stdlib.h>
 #include <string.h>
 
-// ID'ye göre düğüm indexini bul
-int durakIDileIndex(Graf* graf, int durak_id) {
-    for (int i = 0; i < graf->dugum_sayisi; i++) {
-        if (graf->duraklar[i] && graf->duraklar[i]->id == durak_id) {
-            return i;
-        }
-    }
-    return -1;
+/*
+Durak ID'leri:
+id,ad
+1,Taksim
+2,Levent
+3,Maslak
+4,Kadikoy
+5,Uskudar
+6,Besiktas
+7,Sisli
+8,Atasehir
+9,Yenikapi
+10,Bostanci
+*/
+
+/* ================= ID -> INDEX ================= */
+
+int durakIDileIndex(Graf* graf, int durak_id)
+{
+    int idx = durak_id - 1;
+    if (idx < 0 || idx >= graf->dugum_sayisi) return -1;
+    return idx;
 }
 
-// Graf oluştur
-Graf* grafOlustur(Durak* duraklar, Hat* hatlar) {
+
+/* ================= GRAF OLUSTUR ================= */
+
+Graf* grafOlustur(Durak* duraklar, Hat* hatlar)
+{
     Graf* graf = (Graf*)malloc(sizeof(Graf));
     if (!graf) return NULL;
-    
+
     graf->dugum_sayisi = 0;
+
     for (int i = 0; i < GRAF_BOYUT; i++) {
         graf->duraklar[i] = NULL;
         graf->kenarlar[i] = NULL;
         graf->komsu_sayisi[i] = 0;
     }
-    
-    // Durakları ekle
-    Durak* durak_gez = duraklar;
-    while (durak_gez && graf->dugum_sayisi < GRAF_BOYUT) {
-        graf->duraklar[graf->dugum_sayisi] = durak_gez;
-        graf->dugum_sayisi++;
-        durak_gez = durak_gez->sonraki;
-    }
-    
-    // Hatları ekle (çift yönlü)
-    Hat* hat_gez = hatlar;
-    while (hat_gez) {
-        int bas_index = durakIDileIndex(graf, hat_gez->baslangic_id);
-        int hedef_index = durakIDileIndex(graf, hat_gez->hedef_id);
-        
-        if (bas_index != -1 && hedef_index != -1) {
-            // Gidiş yönü
-            Hat* yeni_hat = (Hat*)malloc(sizeof(Hat));
-            yeni_hat->baslangic_id = hat_gez->baslangic_id;
-            yeni_hat->hedef_id = hat_gez->hedef_id;
-            yeni_hat->mesafe = hat_gez->mesafe;
-            yeni_hat->sure = hat_gez->sure;
-            strcpy(yeni_hat->hat_adi, hat_gez->hat_adi);
-            yeni_hat->sonraki = graf->kenarlar[bas_index];
-            graf->kenarlar[bas_index] = yeni_hat;
-            graf->komsu_sayisi[bas_index]++;
-            
-            // Geliş yönü
-            Hat* ters_hat = (Hat*)malloc(sizeof(Hat));
-            ters_hat->baslangic_id = hat_gez->hedef_id;
-            ters_hat->hedef_id = hat_gez->baslangic_id;
-            ters_hat->mesafe = hat_gez->mesafe;
-            ters_hat->sure = hat_gez->sure;
-            strcpy(ters_hat->hat_adi, hat_gez->hat_adi);
-            ters_hat->sonraki = graf->kenarlar[hedef_index];
-            graf->kenarlar[hedef_index] = ters_hat;
-            graf->komsu_sayisi[hedef_index]++;
+
+    /* Duraklari ekle (ID-1 = INDEX) */
+Durak* d = duraklar;
+while (d && graf->dugum_sayisi < GRAF_BOYUT) {
+    int idx = d->id - 1;
+    graf->duraklar[idx] = d;
+    graf->dugum_sayisi++;
+    d = d->sonraki;
+}
+
+    /* Hatlari ekle (CIFT YONLU) */
+    Hat* h = hatlar;
+    while (h) {
+        int b = durakIDileIndex(graf, h->baslangic_id);
+        int t = durakIDileIndex(graf, h->hedef_id);
+
+        if (b != -1 && t != -1) {
+
+            /* Gidis */
+            Hat* ileri = (Hat*)malloc(sizeof(Hat));
+            *ileri = *h;
+            ileri->sonraki = graf->kenarlar[b];
+            graf->kenarlar[b] = ileri;
+            graf->komsu_sayisi[b]++;
+
+            /* Donus */
+            Hat* geri = (Hat*)malloc(sizeof(Hat));
+            *geri = *h;
+            geri->baslangic_id = h->hedef_id;
+            geri->hedef_id = h->baslangic_id;
+            geri->sonraki = graf->kenarlar[t];
+            graf->kenarlar[t] = geri;
+            graf->komsu_sayisi[t]++;
         }
-        hat_gez = hat_gez->sonraki;
+
+        h = h->sonraki;
     }
-    
+
     return graf;
 }
 
-// Grafı yazdır
-void grafYazdir(Graf* graf) {
-    printf("\n=== GRAF YAPISI ===\n");
+/* ================= GRAF YAZDIR ================= */
+
+void grafYazdir(Graf* graf)
+{
+    printf("\n=== GRAF ===\n");
+
     for (int i = 0; i < graf->dugum_sayisi; i++) {
-        printf("%d. %s (ID: %d) -> ", 
-               i+1, graf->duraklar[i]->ad, graf->duraklar[i]->id);
-        
-        Hat* kenar = graf->kenarlar[i];
-        if (!kenar) {
-            printf("Komsu yok\n");
-            continue;
-        }
-        
-        int sayac = 0;
-        while (kenar) {
-            int komsu_index = durakIDileIndex(graf, kenar->hedef_id);
-            if (komsu_index != -1) {
-                printf("%s", graf->duraklar[komsu_index]->ad);
-            } else {
-                printf("ID:%d", kenar->hedef_id);
-            }
-            
-            printf("(%dkm) ", kenar->mesafe);
-            kenar = kenar->sonraki;
-            
-            if (kenar) printf("-> ");
-            sayac++;
-            if (sayac > 5) { printf("..."); break; }
+        printf("%s -> ", graf->duraklar[i]->ad);
+
+        Hat* h = graf->kenarlar[i];
+        while (h) {
+            printf("%d(%s) ",
+                   h->hedef_id,
+                   h->hat_adi);
+            h = h->sonraki;
+            if (h) printf("-> ");
         }
         printf("\n");
     }
-    printf("Toplam %d dugum\n", graf->dugum_sayisi);
 }
 
-// Grafı temizle
-void grafTemizle(Graf* graf) {
+/* ================= GRAF TEMIZLE ================= */
+
+void grafTemizle(Graf* graf)
+{
     for (int i = 0; i < graf->dugum_sayisi; i++) {
-        Hat* kenar = graf->kenarlar[i];
-        while (kenar) {
-            Hat* silinecek = kenar;
-            kenar = kenar->sonraki;
-            free(silinecek);
+        Hat* h = graf->kenarlar[i];
+        while (h) {
+            Hat* sil = h;
+            h = h->sonraki;
+            free(sil);
         }
     }
     free(graf);
+}
+
+/* ================= HAT BUL (GERCEKCI) ================= */
+/*
+ÖNCELİK SIRASI:
+1️⃣ Marmaray (Boğaz geçişi = GERÇEK HAYAT)
+2️⃣ Metro
+3️⃣ Vapur
+4️⃣ Diğer
+*/
+
+Hat* grafHatBul(Graf* graf, int from_id, int to_id)
+{
+    int idx = durakIDileIndex(graf, from_id);
+    if (idx == -1) return NULL;
+
+    Hat* h = graf->kenarlar[idx];
+
+    Hat* marmaray = NULL;
+    Hat* metro    = NULL;
+    Hat* vapur    = NULL;
+    Hat* diger    = NULL;
+
+    while (h) {
+        if (h->hedef_id == to_id) {
+
+            if (strstr(h->hat_adi, "Marmaray"))
+                marmaray = h;
+            else if (strstr(h->hat_adi, "Metro"))
+                metro = h;
+            else if (strstr(h->hat_adi, "Vapur"))
+                vapur = h;
+            else
+                diger = h;
+        }
+        h = h->sonraki;
+    }
+
+    if (marmaray) return marmaray;
+    if (metro)    return metro;
+    if (vapur)    return vapur;
+    return diger;
+}
+/* ================= HAT BUL (BASIT) ================= */
+Hat* grafHatBulBasit(Graf* graf, int from_id, int to_id) {
+    int idx = durakIDileIndex(graf, from_id);
+    if (idx == -1) return NULL;
+    
+    Hat* h = graf->kenarlar[idx];
+    while (h) {
+        if (h->hedef_id == to_id) {
+            return h;
+        }
+        h = h->sonraki;
+    }
+    return NULL;
 }

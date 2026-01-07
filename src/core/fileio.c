@@ -1,4 +1,7 @@
 #include "durak.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 Durak* duraklariOku(const char* dosya_adi) {
     FILE* file = fopen(dosya_adi, "r");
@@ -11,6 +14,7 @@ Durak* duraklariOku(const char* dosya_adi) {
     Durak* bas = NULL;
     Durak* son = NULL;
     
+    // Başlık satırını atla
     fgets(line, sizeof(line), file);
     
     while (fgets(line, sizeof(line), file)) {
@@ -54,6 +58,7 @@ Hat* hatlariOku(const char* dosya_adi) {
     Hat* bas = NULL;
     Hat* son = NULL;
     
+    // Başlık satırını atla
     fgets(line, sizeof(line), file);
     
     while (fgets(line, sizeof(line), file)) {
@@ -101,26 +106,6 @@ Hat* hatlariOku(const char* dosya_adi) {
     return bas;
 }
 
-void duraklariYazdir(Durak* bas) {
-    printf("\n=== DURAKLAR ===\n");
-    Durak* gecici = bas;
-    int sayac = 0;
-    while (gecici) {
-        printf("%d. ID: %d, Ad: %s\n", ++sayac, gecici->id, gecici->ad);
-        gecici = gecici->sonraki;
-    }
-    printf("Toplam %d durak\n", sayac);
-}
-
-void hatlariYazdir(Hat* bas) {
-    printf("\n=== HATLAR ===\n");
-    Hat* gecici = bas;
-    int sayac = 0;
-    while (gecici) {
-        printf("%d. %d -> %d: %d km, %d dak, Hat: %s\n", 
-               ++sayac, gecici->baslangic_id, gecici->hedef_id,
-               gecici->mesafe, gecici->sure, gecici->hat_adi);
-        gecici = gecici->sonraki;
-    }
-    printf("Toplam %d hat\n", sayac);
-}
+// BU FONKSİYONLARI KALDIR veya YORUM SATIRI YAP:
+// void duraklariYazdir(Durak* bas) { ... }
+// void hatlariYazdir(Hat* bas) { ... }
